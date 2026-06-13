@@ -39,8 +39,34 @@ public class TaskFourTests {
         logger.info("use your debugger to find out what wilbur's balance is after all transactions are processed");
         logger.info("kill this test once you find the answer");
         while (true) {
-            Thread.sleep(20000);
-            logger.info("...");
+            try {
+                java.lang.reflect.Field[] fields = userPopulator.getClass().getDeclaredFields();
+                for (java.lang.reflect.Field field : fields) {
+                    if (field.getType().getName().contains("Repository") || field.getType().getName().contains("Conduit")) {
+                        field.setAccessible(true);
+                        Object repoOrConduit = field.get(userPopulator);
+
+                        if (repoOrConduit.getClass().getName().contains("Conduit")) {
+                            java.lang.reflect.Field innerRepo = repoOrConduit.getClass().getDeclaredField("userRepository");
+                            innerRepo.setAccessible(true);
+                            repoOrConduit = innerRepo.get(repoOrConduit);
+                        }
+
+                        Iterable<?> users = (Iterable<?>) repoOrConduit.getClass().getMethod("findAll").invoke(repoOrConduit);
+                        for (Object user : users) {
+                            String userStr = user.toString();
+                            if (userStr.toLowerCase().contains("wilbur")) {
+                                System.out.println(">>> FOUND WILBUR RECORD: " + userStr);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println(">>> Standard polling check...");
+            }
+            Thread.sleep(2000);
         }
     }
 }
+
+
