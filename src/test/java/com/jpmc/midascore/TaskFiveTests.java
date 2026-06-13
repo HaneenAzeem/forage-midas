@@ -48,5 +48,9 @@ public class TaskFiveTests {
         }
         output.append("---end output ---");
         logger.info(output.toString());
+
+        while (true) {
+            Thread.sleep(1000);
+        }
     }
 }
